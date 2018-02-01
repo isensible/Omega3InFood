@@ -47,6 +47,8 @@ namespace RegTabExcel
         private static SubArray<string>[] _tables;
         private static SubArray<string>[] _commands;
         private static IOrderedEnumerable<SubArray<string>> _orderedCommandsAndTables;
+        private static readonly string HeaderOddsRatioLowHigh = "OR (95% CI)";
+        private static readonly string HeaderPValue = "P";
 
         static int Main(string[] args)
         {
@@ -84,8 +86,6 @@ namespace RegTabExcel
             
             PutExcel1(newFile);
 
-            Console.ReadKey();
-
             return 0;
         }
         
@@ -120,7 +120,7 @@ namespace RegTabExcel
                     SubArray<string> table = _tables.FirstOrDefault(x => x.Offset == o.Offset);
                     if (table != null)
                     {
-                        lastRange = PutTableToWorksheet(worksheet, currentAddress, table);
+                        lastRange = PutTableToWorksheet1(worksheet, currentAddress, table);
                         currentAddress = NextAddress(col, lastRange.End.Row);
                     }
                 }
@@ -145,6 +145,11 @@ namespace RegTabExcel
             };
             
             return worksheet.Cells[address.Address].LoadFromText(csv.ToString(), f, TableStyles.Medium10, true);
+        }
+        
+        private static ExcelRangeBase PutTableToWorksheet1(ExcelWorksheet worksheet, ExcelAddress address, SubArray<string> table)
+        {
+            return worksheet.Cells[address.Address].LoadFromDataTable(GetDataTable(table), true);
         }
 
         private static ExcelRangeBase PutCommandToWorksheet(ExcelWorksheet worksheet, ExcelAddress address, SubArray<string> command)
@@ -200,38 +205,33 @@ namespace RegTabExcel
                 .ToArray();
         }
         
-        /*private static DataTable GetDataTable(SubArray<string> table, string tableName = "RegressionTable")
+        private static DataTable GetDataTable(SubArray<string> table, string tableName = "RegressionTable")
         {
             var tokens = TableTokenizer(table);
             
             var headerTokens = HeaderTokenizer(tokens.Header).ToArray();
             
-            DataTable dt = new DataTable(tableName);
+            var dt = new DataTable(tableName);
             dt.Columns.Add(headerTokens[0], typeof(string));
-            dt.Columns.Add("Odds Ratio (Low, High)", typeof(string));
-            dt.Columns.Add("Created", typeof(DateTime));
-            dt.Columns.Add("Modified", typeof(DateTime));
-            foreach (var item in dir.GetDirectories())
+            dt.Columns.Add(HeaderOddsRatioLowHigh, typeof(string));
+            dt.Columns.Add(HeaderPValue, typeof(string));
+            
+            foreach (var row in tokens.Rows)
             {
-                var row=dt.NewRow();
-                row["Name"]=item.Name;
-                row["Created"]=item.CreationTime;
-                row["Modified"]=item.LastWriteTime;
-
-                dt.Rows.Add(row);
+                var data = RowTokenizer(row).ToArray();
+                var dtRow = dt.NewRow();
+                dtRow[headerTokens[0]] = data[0];
+                dtRow[HeaderOddsRatioLowHigh] = 
+                    string.Format(@"{0:0.00} ({1:0.00}, {2:0.00})",
+                        double.Parse(data[1]),
+                        double.Parse(data[5]),
+                        double.Parse(data[6]));
+                dtRow[HeaderPValue] = data[4] == "0.000" ? "<0.001" : data[4];
+                dt.Rows.Add(dtRow);
             }
-            foreach (var item in dir.GetFiles())
-            {
-                var row = dt.NewRow();
-                row["Name"] = item.Name;
-                row["Size"] = item.Length;
-                row["Created"] = item.CreationTime;
-                row["Modified"] = item.LastWriteTime;
-
-                dt.Rows.Add(row);
-            }
+            
             return dt;
-        }*/
+        }
 
         private static IEnumerable<string> TableToCsv(SubArray<string> table, bool escapeCsv = true,  bool writeHeader = false)
         {
@@ -245,15 +245,15 @@ namespace RegTabExcel
                 {
                     yield return string.Join(",",
                         EscapeCsv(h[0]),
-                        EscapeCsv("Odds Ratio (Low High)"),
-                        EscapeCsv(h[4]));
+                        EscapeCsv(HeaderOddsRatioLowHigh),
+                        EscapeCsv(HeaderPValue));
                 }
                 else
                 {
                     yield return string.Join(",",
                         h[0],
-                        "Odds Ratio (Low High)",
-                        h[4]);
+                        HeaderOddsRatioLowHigh,
+                        HeaderPValue);
                 }
             }
             
