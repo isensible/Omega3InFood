@@ -38,6 +38,7 @@
         <e p="Program.cs" t="Include" />
         <e p="RegTabExcel.csproj" t="IncludeRecursive" />
         <e p="SubArray.cs" t="Include" />
+        <e p="~$ed.xls" t="Include" />
       </e>
     </e>
   </component>

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -44,6 +46,7 @@ namespace RegTabExcel
         private static string[] _inputLines;
         private static SubArray<string>[] _tables;
         private static SubArray<string>[] _commands;
+        private static IOrderedEnumerable<SubArray<string>> _orderedCommandsAndTables;
 
         static int Main(string[] args)
         {
@@ -62,13 +65,13 @@ namespace RegTabExcel
 
             IsolateCommands(numberedLines);
 
-            var merged = _commands
+            _orderedCommandsAndTables = _commands
                 .Concat(_tables)
                 .OrderBy(x => x.Offset);
 
             if (options.List)
             {
-                foreach (var t in merged)
+                foreach (var t in _orderedCommandsAndTables)
                 {
                     PrintSubArray(t);
                 }
@@ -79,11 +82,83 @@ namespace RegTabExcel
             if (newFile.Exists)
                 newFile.Delete();
             
-            PutExcel(newFile);
+            PutExcel1(newFile);
 
             Console.ReadKey();
 
             return 0;
+        }
+        
+        private static void PutExcel1(FileInfo newFile)
+        {
+            using (var excel = new ExcelPackage(newFile))
+            {
+                ExcelTextFormat f = new ExcelTextFormat
+                {
+                    TextQualifier = '"',
+                    Delimiter = ','
+                };
+
+                var worksheet = excel.Workbook.Worksheets.Add("Regression_Tables");
+
+                ExcelAddress currentAddress = new ExcelAddress("A1");
+                string col = "A";
+                ExcelRangeBase lastRange;
+
+                ExcelAddress NextAddress(string column, int lastRow) => new ExcelAddress(column + (lastRow + 1));
+
+                foreach (var o in _orderedCommandsAndTables)
+                {
+                    SubArray<string> command = _commands.FirstOrDefault(x => x.Offset == o.Offset);
+                    if (command != null)
+                    {
+                        lastRange = PutCommandToWorksheet(worksheet, currentAddress, command);
+                        currentAddress = NextAddress(col, lastRange.End.Row);
+                        continue;
+                    }
+                    
+                    SubArray<string> table = _tables.FirstOrDefault(x => x.Offset == o.Offset);
+                    if (table != null)
+                    {
+                        lastRange = PutTableToWorksheet(worksheet, currentAddress, table);
+                        currentAddress = NextAddress(col, lastRange.End.Row);
+                    }
+                }
+                
+                excel.Save();
+            }
+        }
+
+        private static ExcelRangeBase PutTableToWorksheet(ExcelWorksheet worksheet, ExcelAddress address, SubArray<string> table)
+        {
+            var csv = new StringBuilder();
+            var c = TableToCsv(table, escapeCsv: false, writeHeader: true);
+            foreach (var line in c)
+            {
+                csv.AppendLine(line);
+            }
+            
+            var f = new ExcelTextFormat
+            {
+                TextQualifier = '"',
+                Delimiter = ','
+            };
+            
+            return worksheet.Cells[address.Address].LoadFromText(csv.ToString(), f, TableStyles.Medium10, true);
+        }
+
+        private static ExcelRangeBase PutCommandToWorksheet(ExcelWorksheet worksheet, ExcelAddress address, SubArray<string> command)
+        {
+            var text = string.Join(Environment.NewLine, command);
+
+            worksheet.SetValue(address.Address, text);
+
+            var cell = worksheet.Cells[address.Address];
+
+            cell.AutoFilter = false;
+            cell.AutoFitColumns();
+            
+            return cell;
         }
 
         private static void PutExcel(FileInfo newFile)
@@ -124,6 +199,39 @@ namespace RegTabExcel
                 .SkipLastN(1)
                 .ToArray();
         }
+        
+        /*private static DataTable GetDataTable(SubArray<string> table, string tableName = "RegressionTable")
+        {
+            var tokens = TableTokenizer(table);
+            
+            var headerTokens = HeaderTokenizer(tokens.Header).ToArray();
+            
+            DataTable dt = new DataTable(tableName);
+            dt.Columns.Add(headerTokens[0], typeof(string));
+            dt.Columns.Add("Odds Ratio (Low, High)", typeof(string));
+            dt.Columns.Add("Created", typeof(DateTime));
+            dt.Columns.Add("Modified", typeof(DateTime));
+            foreach (var item in dir.GetDirectories())
+            {
+                var row=dt.NewRow();
+                row["Name"]=item.Name;
+                row["Created"]=item.CreationTime;
+                row["Modified"]=item.LastWriteTime;
+
+                dt.Rows.Add(row);
+            }
+            foreach (var item in dir.GetFiles())
+            {
+                var row = dt.NewRow();
+                row["Name"] = item.Name;
+                row["Size"] = item.Length;
+                row["Created"] = item.CreationTime;
+                row["Modified"] = item.LastWriteTime;
+
+                dt.Rows.Add(row);
+            }
+            return dt;
+        }*/
 
         private static IEnumerable<string> TableToCsv(SubArray<string> table, bool escapeCsv = true,  bool writeHeader = false)
         {
