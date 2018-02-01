@@ -23,6 +23,8 @@
       <e p="packages" t="ExcludeRecursive" />
       <e p="RegTabExcel" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
+        <e p="ed.xls" t="Include" />
+        <e p="EnumerableExtensions.cs" t="Include" />
         <e p="Examples" t="Include">
           <e p="fish_tinned_30Jan2018.log" t="Include" />
         </e>
@@ -35,6 +37,7 @@
         </e>
         <e p="Program.cs" t="Include" />
         <e p="RegTabExcel.csproj" t="IncludeRecursive" />
+        <e p="SubArray.cs" t="Include" />
       </e>
     </e>
   </component>
