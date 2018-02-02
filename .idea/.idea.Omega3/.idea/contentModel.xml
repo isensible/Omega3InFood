@@ -24,8 +24,30 @@
       <e p="RegTabExcel" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
         <e p="ed.xls" t="Include" />
+        <e p="ed.xlsx" t="Include" />
         <e p="EnumerableExtensions.cs" t="Include" />
         <e p="Examples" t="Include">
+          <e p="1Feb18" t="Include">
+            <e p="fish_fried_1Feb18.xls" t="Include" />
+            <e p="fish_fried_1Feb2018.log" t="Include" />
+            <e p="fish_fried_3Feb18.xlsx" t="Include" />
+            <e p="fish_grill_1Feb18.xls" t="Include" />
+            <e p="fish_grill_1Feb2018.log" t="Include" />
+            <e p="fish_grill_3Feb18.xlsx" t="Include" />
+            <e p="fish_tinned_1Feb18.xls" t="Include" />
+            <e p="fish_tinned_1Feb2018.log" t="Include" />
+            <e p="fish_tinned_3Feb18.xlsx" t="Include" />
+            <e p="fish_tinned_sensitivity_1Feb18.xls" t="Include" />
+            <e p="fish_tinned_sensitivity_1Feb2018.log" t="Include" />
+            <e p="fish_tinned_sensitivity_3Feb18.xlsx" t="Include" />
+          </e>
+          <e p="files" t="Include">
+            <e p="fish_fried_3Feb2018.log" t="Include" />
+            <e p="fish_grill_3Feb2018.log" t="Include" />
+            <e p="fish_tinned_3Feb2018.log" t="Include" />
+            <e p="fish_tinned_sensitivity_3Feb2018.log" t="Include" />
+          </e>
+          <e p="files.zip" t="Include" />
           <e p="fish_tinned_30Jan2018.log" t="Include" />
         </e>
         <e p="obj" t="ExcludeRecursive">
@@ -38,7 +60,6 @@
         <e p="Program.cs" t="Include" />
         <e p="RegTabExcel.csproj" t="IncludeRecursive" />
         <e p="SubArray.cs" t="Include" />
-        <e p="~$ed.xls" t="Include" />
       </e>
     </e>
   </component>

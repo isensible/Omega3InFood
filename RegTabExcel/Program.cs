@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using CommandLine;
 using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using OfficeOpenXml.Table;
 
 namespace RegTabExcel
@@ -100,28 +102,45 @@ namespace RegTabExcel
                 };
 
                 var worksheet = excel.Workbook.Worksheets.Add("Regression_Tables");
+                
+                worksheet.Cells.Style.Font.Name = "Times New Roman";
+                worksheet.Cells.Style.Font.Size = 12;
+                
+                var colA = worksheet.Column(1);
+                colA.Width = 120;
+                colA.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                
+                var colB = worksheet.Column(2);
+                colB.Width = 50;
+                colB.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                
+                var colC = worksheet.Column(3);
+                colC.Width = 40;
+                colC.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                
+                var currentAddress = new ExcelAddress("A1");
+                const string col = "A";
 
-                ExcelAddress currentAddress = new ExcelAddress("A1");
-                string col = "A";
-                ExcelRangeBase lastRange;
-
-                ExcelAddress NextAddress(string column, int lastRow) => new ExcelAddress(column + (lastRow + 1));
+                ExcelAddress NextAddress(string column, int lastRow, int gapSize = 0) => new ExcelAddress(column + (lastRow + gapSize + 1));
 
                 foreach (var o in _orderedCommandsAndTables)
                 {
-                    SubArray<string> command = _commands.FirstOrDefault(x => x.Offset == o.Offset);
+                    var command = _commands.FirstOrDefault(x => x.Offset == o.Offset);
                     if (command != null)
                     {
-                        lastRange = PutCommandToWorksheet(worksheet, currentAddress, command);
-                        currentAddress = NextAddress(col, lastRange.End.Row);
+                        var range = PutCommandToWorksheet(worksheet, currentAddress, command);
+                        range.Style.Font.Bold = true;
+                        range.Style.WrapText = true;
+                        currentAddress = NextAddress(col, range.End.Row);
                         continue;
                     }
                     
-                    SubArray<string> table = _tables.FirstOrDefault(x => x.Offset == o.Offset);
+                    var table = _tables.FirstOrDefault(x => x.Offset == o.Offset);
                     if (table != null)
                     {
-                        lastRange = PutTableToWorksheet1(worksheet, currentAddress, table);
-                        currentAddress = NextAddress(col, lastRange.End.Row);
+                        var range = PutTableToWorksheet1(worksheet, currentAddress, table);
+                        range.AutoFilter = false;
+                        currentAddress = NextAddress(col, range.End.Row, gapSize:1);
                     }
                 }
                 
@@ -149,7 +168,7 @@ namespace RegTabExcel
         
         private static ExcelRangeBase PutTableToWorksheet1(ExcelWorksheet worksheet, ExcelAddress address, SubArray<string> table)
         {
-            return worksheet.Cells[address.Address].LoadFromDataTable(GetDataTable(table), true);
+            return worksheet.Cells[address.Address].LoadFromDataTable(GetDataTable(table, tableName:address.Address), true, TableStyles.None);
         }
 
         private static ExcelRangeBase PutCommandToWorksheet(ExcelWorksheet worksheet, ExcelAddress address, SubArray<string> command)
