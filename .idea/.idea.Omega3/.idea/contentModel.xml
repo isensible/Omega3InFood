@@ -41,6 +41,8 @@
             <e p="fish_tinned_sensitivity_1Feb2018.log" t="Include" />
             <e p="fish_tinned_sensitivity_3Feb18.xlsx" t="Include" />
           </e>
+          <e p="dietary_changes_6Feb2018[3173].log" t="Include" />
+          <e p="dietary_changes_6Feb2018[3173].log.xlsx" t="Include" />
           <e p="files" t="Include">
             <e p="fish_fried_3Feb2018.log" t="Include" />
             <e p="fish_grill_3Feb2018.log" t="Include" />
@@ -48,7 +50,11 @@
             <e p="fish_tinned_sensitivity_3Feb2018.log" t="Include" />
           </e>
           <e p="files.zip" t="Include" />
+          <e p="Fish_6_Feb_2018[3179].log" t="Include" />
+          <e p="Fish_6_Feb_2018[3179].log.xlsx" t="Include" />
           <e p="fish_tinned_30Jan2018.log" t="Include" />
+          <e p="fish_tinned_sensitivity_6Feb2018[3178].log" t="Include" />
+          <e p="fish_tinned_sensitivity_6Feb2018[3178].log.xlsx" t="Include" />
         </e>
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
@@ -60,6 +66,115 @@
         <e p="Program.cs" t="Include" />
         <e p="RegTabExcel.csproj" t="IncludeRecursive" />
         <e p="SubArray.cs" t="Include" />
+      </e>
+      <e p="RegTabWeb" t="IncludeRecursive">
+        <e p="appsettings.Development.json" t="Include" />
+        <e p="appsettings.json" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="bundleconfig.json" t="Include" />
+        <e p="Internal" t="Include">
+          <e p="LoggerExtensions.cs" t="Include" />
+        </e>
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.0" t="Include">
+              <e p="RegTabWeb.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Pages" t="Include">
+          <e p="_Layout.cshtml" t="Include" />
+          <e p="_ValidationScriptsPartial.cshtml" t="Include" />
+          <e p="_ViewImports.cshtml" t="Include" />
+          <e p="_ViewStart.cshtml" t="Include" />
+          <e p="About.cshtml" t="Include" />
+          <e p="About.cshtml.cs" t="Include" />
+          <e p="Contact.cshtml" t="Include" />
+          <e p="Contact.cshtml.cs" t="Include" />
+          <e p="Error.cshtml" t="Include" />
+          <e p="Error.cshtml.cs" t="Include" />
+          <e p="Index.cshtml" t="Include" />
+          <e p="Index.cshtml.cs" t="Include" />
+        </e>
+        <e p="Program.cs" t="Include" />
+        <e p="RegTabWeb.csproj" t="IncludeRecursive" />
+        <e p="Services" t="Include">
+          <e p="EnumerableExtensions.cs" t="Include" />
+          <e p="ExcelFromStataRegressionLog.cs" t="Include" />
+          <e p="NumberedLine.cs" t="Include" />
+          <e p="Options.cs" t="Include" />
+          <e p="StringTable.cs" t="Include" />
+          <e p="SubArray.cs" t="Include" />
+        </e>
+        <e p="Startup.cs" t="Include" />
+        <e p="Utilities" t="Include">
+          <e p="FileHelpers.cs" t="Include" />
+        </e>
+        <e p="wwwroot" t="Include">
+          <e p="css" t="Include">
+            <e p="site.css" t="Include" />
+            <e p="site.min.css" t="Include" />
+          </e>
+          <e p="favicon.ico" t="Include" />
+          <e p="images" t="Include">
+            <e p="banner1.svg" t="Include" />
+            <e p="banner2.svg" t="Include" />
+            <e p="banner3.svg" t="Include" />
+            <e p="banner4.svg" t="Include" />
+          </e>
+          <e p="js" t="Include">
+            <e p="site.js" t="Include" />
+            <e p="site.min.js" t="Include" />
+          </e>
+          <e p="lib" t="Include">
+            <e p="bootstrap" t="Include">
+              <e p=".bower.json" t="Include" />
+              <e p="dist" t="Include">
+                <e p="css" t="Include">
+                  <e p="bootstrap-theme.css" t="Include" />
+                  <e p="bootstrap-theme.css.map" t="Include" />
+                  <e p="bootstrap-theme.min.css.map" t="Include" />
+                  <e p="bootstrap.css" t="Include" />
+                  <e p="bootstrap.css.map" t="Include" />
+                  <e p="bootstrap.min.css.map" t="Include" />
+                </e>
+                <e p="fonts" t="Include">
+                  <e p="glyphicons-halflings-regular.eot" t="Include" />
+                  <e p="glyphicons-halflings-regular.svg" t="Include" />
+                  <e p="glyphicons-halflings-regular.ttf" t="Include" />
+                  <e p="glyphicons-halflings-regular.woff" t="Include" />
+                  <e p="glyphicons-halflings-regular.woff2" t="Include" />
+                </e>
+                <e p="js" t="Include">
+                  <e p="bootstrap.js" t="Include" />
+                  <e p="npm.js" t="Include" />
+                </e>
+              </e>
+              <e p="LICENSE" t="Include" />
+            </e>
+            <e p="jquery" t="Include">
+              <e p=".bower.json" t="Include" />
+              <e p="dist" t="Include">
+                <e p="jquery.js" t="Include" />
+                <e p="jquery.min.map" t="Include" />
+              </e>
+              <e p="LICENSE.txt" t="Include" />
+            </e>
+            <e p="jquery-validation" t="Include">
+              <e p=".bower.json" t="Include" />
+              <e p="dist" t="Include">
+                <e p="additional-methods.js" t="Include" />
+                <e p="jquery.validate.js" t="Include" />
+              </e>
+              <e p="LICENSE.md" t="Include" />
+            </e>
+            <e p="jquery-validation-unobtrusive" t="Include">
+              <e p=".bower.json" t="Include" />
+              <e p="jquery.validate.unobtrusive.js" t="Include" />
+              <e p="jquery.validate.unobtrusive.min.js" t="Include" />
+            </e>
+          </e>
+        </e>
       </e>
     </e>
   </component>

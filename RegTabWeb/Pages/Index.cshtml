@@ -1,0 +1,17 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="FileUpload">Stata log file</label>
+        <input asp-for="FileUpload" type="file" class="form-control-file">
+        
+        <label asp-for="Key">Key</label>
+        <input asp-for="Key" type="text" class="control-label"/>
+    </div>
+    <input type="submit" name="save" value="Generate" />
+</form>
+
