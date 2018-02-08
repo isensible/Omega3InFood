@@ -49,8 +49,6 @@ namespace RegTabWeb.Pages
             
             if (!string.IsNullOrEmpty(UploadedContent) )
             {
-                _logger.ExcelDownloadRequested(FileName, UploadedContent);
-                
                 var fileDownloadName = Path.GetFileName(FileName) + "*.xlsx";
 
                 try

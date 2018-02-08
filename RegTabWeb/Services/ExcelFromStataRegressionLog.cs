@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Logging;
@@ -88,17 +89,18 @@ namespace RegTabWeb.Services
                 
                 worksheet.Cells.Style.Font.Name = "Times New Roman";
                 worksheet.Cells.Style.Font.Size = 12;
+                worksheet.View.ShowGridLines = false;
                 
                 var colA = worksheet.Column(1);
-                colA.Width = 120;
+                colA.Width = 50;
                 colA.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
                 
                 var colB = worksheet.Column(2);
-                colB.Width = 50;
+                colB.Width = 25;
                 colB.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 
                 var colC = worksheet.Column(3);
-                colC.Width = 40;
+                colC.Width = 15;
                 colC.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 
                 var currentAddress = new ExcelAddress("A1");
@@ -112,8 +114,7 @@ namespace RegTabWeb.Services
                     if (command != null)
                     {
                         var range = AppendStataCommandToWorksheet(worksheet, currentAddress, command);
-                        range.Style.Font.Bold = true;
-                        range.Style.WrapText = true;
+                        
                         currentAddress = NextAddress(col, range.End.Row);
                         continue;
                     }
@@ -135,8 +136,10 @@ namespace RegTabWeb.Services
                     if (table != null)
                     {
                         var range = AppendRegressionTableToWorksheet(worksheet, currentAddress, table);
-                        range.AutoFilter = false;
-                        range.Style.Border.BorderAround(ExcelBorderStyle.Thin);
+                        
+                        var headerRange = worksheet.Cells[range.Start.Row, range.Start.Column, range.Start.Row, range.End.Column];
+                        headerRange.AutoFilter = false;
+                        headerRange.Style.Font.Bold = true;
                         
                         currentAddress = NextAddress(col, range.End.Row, gapSize:1);
                     }
@@ -154,15 +157,20 @@ namespace RegTabWeb.Services
         private ExcelRangeBase AppendStataCommandToWorksheet(ExcelWorksheet worksheet, ExcelAddress address, SubArray<string> command)
         {
             var text = string.Join(Environment.NewLine, command);
-
+            worksheet.Row(address.Start.Row).Height = 46;
             worksheet.SetValue(address.Address, text);
+            worksheet.Cells[address.Start.Row, address.Start.Column, address.End.Row, address.End.Column + 2].Merge = true;
+            var range = worksheet.Cells[address.Start.Row, address.Start.Column, address.End.Row, address.End.Column + 2];
+            range.Style.Font.Bold = true;
+            range.Style.Font.Name = "Courier New";
+            range.Style.Font.Size = 9;
+            range.Style.WrapText = true;
+            range.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            range.Style.Border.Top.Style = ExcelBorderStyle.Dotted;
 
-            var cell = worksheet.Cells[address.Address];
-
-            cell.AutoFilter = false;
-            cell.AutoFitColumns();
+            worksheet.Row(address.Start.Row).Height = 46;
             
-            return cell;
+            return range;
         }
 
         private NumberedLine[] NumberTheLines()
@@ -195,7 +203,7 @@ namespace RegTabWeb.Services
                         double.Parse(data[1]),
                         double.Parse(data[5]),
                         double.Parse(data[6]));
-                dtRow[HeaderPValue] = data[4] == "0.000" ? "<0.001" : data[4];
+                dtRow[HeaderPValue] = data[4] == "\"0.000\"" ? "\"<0.001\"" : data[4];
                 dt.Rows.Add(dtRow);
             }
             
