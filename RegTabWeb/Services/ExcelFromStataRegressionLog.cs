@@ -219,11 +219,15 @@ namespace RegTabWeb.Services
 
         private void LocateStataCommands(NumberedLine[] numberedLines)
         {
-            var commandString = ". xi:clogit";
+            var commandStrings = new []
+            {
+                ". xi:clogit", ". xi:logit"
+            };
+            
             var commandContinuationString = ">";
             
             var withIndices = numberedLines
-                .Where(a => a.Line.StartsWith(commandString) || a.Line.StartsWith(commandContinuationString))
+                .Where(a => commandStrings.Any(s => a.Line.StartsWith(s)) || a.Line.StartsWith(commandContinuationString))
                 .OrderBy(a => a.LineNumber)
                 .ToArray();
 
@@ -234,7 +238,7 @@ namespace RegTabWeb.Services
             bool expectingAnotherLine = false;
             foreach (var c in withIndices)
             {
-                if (c.Line.StartsWith(commandString))
+                if (commandStrings.Any(s => c.Line.StartsWith(s)))
                 {
                     firstLine = c.LineNumber;
                     lastLine = c.LineNumber;
