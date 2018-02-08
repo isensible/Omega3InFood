@@ -24,6 +24,7 @@ namespace RegTabWeb.Services
         private IOrderedEnumerable<SubArray<string>> _orderedCommandsAndTables;
         private readonly string HeaderOddsRatioLowHigh = "OR (95% CI)";
         private readonly string HeaderPValue = "P";
+        private SubArray<string>[] _numberOfObs;
 
         public ExcelFromStataRegressionLog(ILogger<ExcelFromStataRegressionLog> logger)
         {
@@ -62,8 +63,11 @@ namespace RegTabWeb.Services
             LocateStataLogTables(numberedLines);
 
             LocateStataCommands(numberedLines);
+            
+            LocateStataStats(numberedLines);
 
             _orderedCommandsAndTables = _commands
+                .Concat(_numberOfObs)
                 .Concat(_tables)
                 .OrderBy(x => x.Offset);
 
@@ -113,12 +117,27 @@ namespace RegTabWeb.Services
                         currentAddress = NextAddress(col, range.End.Row);
                         continue;
                     }
+
+                    var obs = _numberOfObs.FirstOrDefault(x => x.Offset == o.Offset);
+                    if (obs != null)
+                    {
+                        var split = obs[0]
+                            .Split("=", StringSplitOptions.RemoveEmptyEntries)
+                            .Select(s => s.Trim())
+                            .ToArray();
+
+                        worksheet.Cells[currentAddress.Start.Row, currentAddress.Start.Column].Value = split[0];
+                        worksheet.Cells[currentAddress.Start.Row, currentAddress.Start.Column+1].Value = split[1];
+                        currentAddress = NextAddress(col, currentAddress.End.Row);
+                    }
                     
                     var table = _tables.FirstOrDefault(x => x.Offset == o.Offset);
                     if (table != null)
                     {
                         var range = AppendRegressionTableToWorksheet(worksheet, currentAddress, table);
                         range.AutoFilter = false;
+                        range.Style.Border.BorderAround(ExcelBorderStyle.Thin);
+                        
                         currentAddress = NextAddress(col, range.End.Row, gapSize:1);
                     }
                 }
@@ -215,6 +234,17 @@ namespace RegTabWeb.Services
 
             foreach (var column in dataSplit)
                 yield return column;
+        }
+
+        private void LocateStataStats(NumberedLine[] numberedLines)
+        {
+            const string numberOfObs = "Number of obs";
+
+            _numberOfObs = numberedLines
+                .Where(a => a.Line.Contains(numberOfObs))
+                .OrderBy(a => a.LineNumber)
+                .Select(a => new SubArray<string>(_inputLines, a.LineNumber, 1))
+                .ToArray();
         }
 
         private void LocateStataCommands(NumberedLine[] numberedLines)

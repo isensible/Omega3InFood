@@ -79,9 +79,12 @@ namespace RegTabWeb.Pages
 
         public async Task<IActionResult> OnPostAsync()
         {
-            _logger.StataLogFileUploadRequested(FileUpload.FileName);
-            
             if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            if (string.IsNullOrEmpty(FileUpload?.FileName))
             {
                 return Page();
             }
