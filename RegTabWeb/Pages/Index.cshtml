@@ -8,9 +8,12 @@
     <div class="form-group">
         <label asp-for="FileUpload">Stata log file</label>
         <input asp-for="FileUpload" type="file" class="form-control-file">
-        
+        <span asp-validation-for="FileUpload"></span>
+    </div>
+    <div class="form-group">
         <label asp-for="Key">Key</label>
         <input asp-for="Key" type="text" class="control-label"/>
+        <span asp-validation-for="Key"></span>
     </div>
     <input type="submit" name="save" value="Generate" />
 </form>

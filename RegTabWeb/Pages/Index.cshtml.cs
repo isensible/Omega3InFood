@@ -21,12 +21,10 @@ namespace RegTabWeb.Pages
 
         [BindProperty]
         [Required]
-        [Display(Name="Service key")]
         public string Key { get; set; }
         
         [BindProperty]
         [Required]
-        [Display(Name = StataLogFileFieldName)]
         public IFormFile FileUpload { get; set; }
 
         [TempData]
