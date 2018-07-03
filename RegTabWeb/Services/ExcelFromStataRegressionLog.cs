@@ -270,7 +270,8 @@ namespace RegTabWeb.Services
 
         private static string Quoted(string number)
         {
-            return string.Format($"\"{number}\"");
+            return number;
+            //return string.Format($"\"{number}\"");
         }
         
         private StringTable StataLogTableTokenizer(SubArray<string> table)
