@@ -106,8 +106,6 @@ namespace RegTabWeb.Services
                 var currentAddress = new ExcelAddress("A1");
                 const string col = "A";
 
-                ExcelAddress NextAddress(string column, int lastRow, int gapSize = 0) => new ExcelAddress(column + (lastRow + gapSize + 1));
-
                 foreach (var o in _orderedCommandsAndTables)
                 {
                     var command = _commands.FirstOrDefault(x => x.Offset == o.Offset);
@@ -149,6 +147,8 @@ namespace RegTabWeb.Services
             }
         }
 
+        private ExcelAddress NextAddress(string column, int lastRow, int gapSize = 0) => new ExcelAddress(column + (lastRow + gapSize + 1));
+
         private ExcelRangeBase AppendRegressionTableToWorksheet(ExcelWorksheet worksheet, ExcelAddress address, SubArray<string> table)
         {
             return worksheet.Cells[address.Address].LoadFromDataTable(BuildRegressionDataTable(table, tableName:address.Address), true, TableStyles.None);
@@ -163,7 +163,7 @@ namespace RegTabWeb.Services
             var range = worksheet.Cells[address.Start.Row, address.Start.Column, address.End.Row, address.End.Column + 2];
             range.Style.Font.Bold = true;
             range.Style.Font.Name = "Courier New";
-            range.Style.Font.Size = 9;
+            range.Style.Font.Size = 12;
             range.Style.WrapText = true;
             range.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             range.Style.Border.Top.Style = ExcelBorderStyle.Dotted;
@@ -181,6 +181,29 @@ namespace RegTabWeb.Services
                 .SkipLastN(1)
                 .ToArray();
         }
+
+//        private ExcelRangeBase AppendRegressionTable(
+//            ExcelWorksheet worksheet, 
+//            ExcelAddress address,
+//            SubArray<string> table)
+//        {
+//            var tokens = StataLogTableTokenizer(table);
+//
+//            var headerTokens = StataLogTableHeaderTokenizer(tokens.Header).ToArray();
+//
+//            var headerRange = worksheet.Cells[
+//                address.Start.Row, address.Start.Column,
+//                address.End.Row, address.End.Column + 2];
+//
+//            var currentAddress = ExcelAddress.;
+//            
+//            foreach (var row in tokens.Rows)
+//            {
+//                var data = StataLogTableHeaderTokenizer(row).ToArray();
+//
+//                worksheet.Cells[];
+//            }
+//        }
         
         private DataTable BuildRegressionDataTable(SubArray<string> table, string tableName = "RegressionTable")
         {
@@ -196,20 +219,59 @@ namespace RegTabWeb.Services
             foreach (var row in tokens.Rows)
             {
                 var data = StataLogTableRowTokenizer(row).ToArray();
+                _logger.LogDebug(string.Join("|", data.Select(d => d)));
+                if (!data.Any() || data.Length != 7)
+                    continue;
                 var dtRow = dt.NewRow();
                 dtRow[headerTokens[0]] = data[0];
-                dtRow[HeaderOddsRatioLowHigh] = 
-                    string.Format(@"{0:0.00} ({1:0.00}, {2:0.00})",
-                        double.Parse(data[1]),
-                        double.Parse(data[5]),
-                        double.Parse(data[6]));
-                dtRow[HeaderPValue] = data[4] == "\"0.000\"" ? "\"<0.001\"" : data[4];
+
+                var data5IsDot = data[5] == ".";
+                var data6IsDot = data[6] == ".";
+
+                if (data5IsDot && data6IsDot)
+                {
+                    dtRow[HeaderOddsRatioLowHigh] =
+                        Quoted(string.Format(@"{0:0.00} ({1}, {2})",
+                            double.Parse(data[1]),
+                            data[5],
+                            data[6]));
+                }
+                else if (data6IsDot)
+                {
+                    dtRow[HeaderOddsRatioLowHigh] =
+                        Quoted(string.Format(@"{0:0.00} ({1:0.00}, {2})",
+                            double.Parse(data[1]),
+                            double.Parse(data[5]),
+                            data[6]));
+                }
+                else if (data5IsDot)
+                {
+                    dtRow[HeaderOddsRatioLowHigh] =
+                        Quoted(string.Format(@"{0:0.00} ({1}, {2:0.00})",
+                            double.Parse(data[1]),
+                            data[5],
+                            double.Parse(data[6])));
+                }
+                else
+                {
+                    dtRow[HeaderOddsRatioLowHigh] =
+                        Quoted(string.Format(@"{0:0.00} ({1:0.00}, {2:0.00})",
+                            double.Parse(data[1]),
+                            double.Parse(data[5]),
+                            double.Parse(data[6])));
+                }
+
+                dtRow[HeaderPValue] = data[4] == "0.000" ? Quoted("<0.001") : Quoted(data[4]);
                 dt.Rows.Add(dtRow);
             }
             
             return dt;
         }
 
+        private static string Quoted(string number)
+        {
+            return string.Format($"\"{number}\"");
+        }
         
         private StringTable StataLogTableTokenizer(SubArray<string> table)
         {
