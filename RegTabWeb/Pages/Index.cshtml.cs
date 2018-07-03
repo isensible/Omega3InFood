@@ -85,7 +85,7 @@ namespace RegTabWeb.Pages
                 return Page();
             }
             
-            if (Key != "cindy")
+            if (Key != "cindy" || Key != "black")
             {
                 return Page();
             }
